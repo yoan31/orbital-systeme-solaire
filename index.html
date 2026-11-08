@@ -4739,7 +4739,7 @@ const solarWeather = {
   enabled: true, loading: false, live: false, effectsOn: false, lastFetch: 0, lastSdo: 0,
   wave: '0193', data: {}, errors: {}, token: 0, uiKey: '', badge: 'Chargement…', badgeClass: 'off',
   flareLevel: 0, flareActive: false, auroraTexture: null, ovationMax: 0,
-  aurora: null, magneto: null, windPoints: null, flareSprite: null
+  aurora: null, magneto: null, flareSprite: null
 };
 
 const solarEls = {};
@@ -4813,40 +4813,6 @@ void main(){
   #include <logdepthbuf_fragment>
 }`;
 
-const WIND_VERT = `
-#include <common>
-#include <logdepthbuf_pars_vertex>
-uniform vec3 uEarthPos; uniform float uTime, uWind, uActive, uPixelRatio;
-attribute float aPhase; attribute vec2 aSpread; attribute float aSize;
-varying float vAlpha;
-void main(){
-  vec3 axis = normalize(uEarthPos);
-  vec3 up = abs(axis.y) < 0.9 ? vec3(0.0, 1.0, 0.0) : vec3(1.0, 0.0, 0.0);
-  vec3 s1 = normalize(cross(axis, up));
-  vec3 s2 = cross(axis, s1);
-  float speed = clamp(uWind / 400.0, 0.25, 2.5);
-  float t = fract(aPhase + uTime * 0.024 * speed);
-  float L = max(length(uEarthPos), 0.001);
-  vec3 pos = axis * (t * L) + (s1 * aSpread.x + s2 * aSpread.y) * L * 0.06 * (0.25 + 0.75 * t);
-  vAlpha = uActive * smoothstep(0.0, 0.035, t) * (1.0 - smoothstep(0.88, 1.0, t));
-  vec4 mv = modelViewMatrix * vec4(pos, 1.0);
-  gl_Position = projectionMatrix * mv;
-  gl_PointSize = clamp(aSize * uPixelRatio * (240.0 / max(-mv.z, 0.8)), 1.0, 2.8 * uPixelRatio);
-  #include <logdepthbuf_vertex>
-}`;
-
-const WIND_FRAG = `
-#include <common>
-#include <logdepthbuf_pars_fragment>
-varying float vAlpha;
-void main(){
-  vec2 d = gl_PointCoord - 0.5;
-  float m = smoothstep(0.5, 0.10, length(d));
-  if (m < 0.02) discard;
-  gl_FragColor = vec4(vec3(1.0, 0.78, 0.42), m * vAlpha * 0.7);
-  #include <logdepthbuf_fragment>
-}`;
-
 function makeProminenceTexture() {
   const c = document.createElement('canvas');
   c.width = 256; c.height = 256;
@@ -4885,38 +4851,6 @@ function buildSolarScene() {
   flare.visible = false;
   sun.group.add(flare);
   solarWeather.flareSprite = flare;
-
-  // Vent solaire : points le long de l'axe Soleil-Terre.
-  const count = 1400;
-  const g = new THREE.BufferGeometry();
-  g.setAttribute('position', new THREE.BufferAttribute(new Float32Array(count * 3), 3));
-  const phase = new Float32Array(count), spread = new Float32Array(count * 2), sizes = new Float32Array(count);
-  const r = rng(0x50A4);
-  for (let i = 0; i < count; i++) {
-    phase[i] = r();
-    const a = r() * Math.PI * 2, rad = Math.sqrt(r());
-    spread[i * 2] = Math.cos(a) * rad;
-    spread[i * 2 + 1] = Math.sin(a) * rad;
-    sizes[i] = 0.7 + r() * 1.5;
-  }
-  g.setAttribute('aPhase', new THREE.BufferAttribute(phase, 1));
-  g.setAttribute('aSpread', new THREE.BufferAttribute(spread, 2));
-  g.setAttribute('aSize', new THREE.BufferAttribute(sizes, 1));
-  g.boundingSphere = new THREE.Sphere(new THREE.Vector3(), 1e9);
-  const wm = new THREE.ShaderMaterial({
-    uniforms: {
-      uEarthPos: { value: new THREE.Vector3() }, uTime: { value: 0 }, uWind: { value: 0 },
-      uActive: { value: 1 }, uPixelRatio: { value: renderer.getPixelRatio() }
-    },
-    vertexShader: WIND_VERT, fragmentShader: WIND_FRAG,
-    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending
-  });
-  const wind = new THREE.Points(g, wm);
-  wind.frustumCulled = false;
-  wind.visible = false;
-  wind.renderOrder = 1;
-  scene.add(wind);
-  solarWeather.windPoints = wind;
 
   // Aurores : sphère juste au-dessus de la Terre, image Ovation ou anneau procédural.
   const auroraMat = new THREE.ShaderMaterial({
@@ -5396,22 +5330,6 @@ function updateSolarFrame(dt, now) {
     solarWeather.flareSprite.visible = fx && solarWeather.flareLevel > 0.02;
   }
 
-  // Vent solaire.
-  if (solarWeather.windPoints) {
-    const wp = solarWeather.windPoints;
-    const speed = d.wind ? d.wind.speed : 0;
-    const on = fx && speed > 0;
-    wp.visible = !!on;
-    if (on) {
-      const wu = wp.material.uniforms;
-      wu.uEarthPos.value.copy(earth.worldPos);
-      wu.uTime.value = state.timeElapsed;
-      wu.uWind.value = speed;
-      wu.uActive.value = 1;
-      wu.uPixelRatio.value = renderer.getPixelRatio();
-    }
-  }
-
   // Aurores polaires.
   if (solarWeather.aurora) {
     const a = solarWeather.aurora;
@@ -5472,7 +5390,6 @@ function setSolarEnabled(on) {
   if (solarEls.switch) solarEls.switch.checked = !!on;
   if (!on) {
     solarWeather.effectsOn = false;
-    if (solarWeather.windPoints) solarWeather.windPoints.visible = false;
     if (solarWeather.aurora) solarWeather.aurora.visible = false;
     if (solarWeather.magneto) solarWeather.magneto.group.visible = false;
     if (solarWeather.flareSprite) solarWeather.flareSprite.visible = false;
@@ -5490,7 +5407,6 @@ function setSolarEnabled(on) {
 
 function applySolarLayers() {
   if (!solarWeather.enabled) {
-    if (solarWeather.windPoints) solarWeather.windPoints.visible = false;
     if (solarWeather.aurora) solarWeather.aurora.visible = false;
     if (solarWeather.magneto) solarWeather.magneto.group.visible = false;
     if (solarWeather.flareSprite) solarWeather.flareSprite.visible = false;

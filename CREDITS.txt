@@ -178,7 +178,6 @@ NOAA SWPC — domaine public, CORS vérifié.
   RTSW ci-dessus, actifs, sont utilisés à la place.
 
 Effets : éruption M/X récente < 2 h = flash localisé + boucle, pic de bloom ;
-vent solaire = particules Soleil→Terre animées, vitesse proportionnelle ;
 Ovation + Kp = aurores côté nuit ; G3+ = compression visuelle de la
 magnétosphère. Hors ±3 h de la date réelle, effets réels désactivés et badge
 « activité solaire simulée ». SDO reste visible en 2D avec la mention

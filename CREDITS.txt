@@ -1,0 +1,207 @@
+ORBITAL — Crédits, licences et sources
+======================================
+
+Simulation 3D du système solaire, page unique index.html.
+Les positions héliocentriques sont recalculées depuis le Jour Julien à chaque image.
+
+TEXTURES (dossier textures/)
+----------------------------
+Solar System Scope — https://www.solarsystemscope.com/textures/
+Licence Creative Commons Attribution 4.0 (CC BY 4.0) — attribution obligatoire.
+Fichiers utilisés :
+  sun.jpg                 (8k_sun.jpg, 4096x2048)
+  mercury.jpg             (2k_mercury.jpg)
+  venus_surface.jpg       (2k_venus_surface.jpg)
+  venus_atmosphere.jpg    (2k_venus_atmosphere.jpg)
+  earth_day.jpg           (8k_earth_daymap.jpg, réduit 8192->4096)
+  earth_night.jpg         (8k_earth_nightmap.jpg, réduit 8192->4096)
+  earth_clouds.jpg        (2k_earth_clouds.jpg)
+  earth_normal.png        (2k_earth_normal_map.tif converti en PNG)
+  earth_specular.png      (2k_earth_specular_map.tif converti en PNG)
+  moon.jpg                (2k_moon.jpg)
+  mars.jpg                (2k_mars.jpg)
+  jupiter.jpg             (2k_jupiter.jpg)
+  saturn.jpg              (2k_saturn.jpg)
+  saturn_ring.png         (2k_saturn_ring_alpha.png, bande radiale 2048x125)
+  uranus.jpg              (2k_uranus.jpg)
+  neptune.jpg             (2k_neptune.jpg)
+  stars_milkyway.jpg      (8k_stars_milky_way.jpg, réduit 8192->4096)
+  stars.jpg               (2k_stars.jpg)
+
+Modifications apportées : conversion TIF -> PNG, réduction des cartes 8K
+Terre jour/nuit et Voie lactée à 4K pour limiter l'empreinte mémoire GPU,
+ré-encodage JPEG progressif. Aucun autre traitement.
+
+Textures de secours (si les fichiers locaux sont absents, chargées à distance
+avec CORS) :
+  three.js r160 — examples/textures/planets/ — licence MIT
+    earth_atmos_4096.jpg, earth_lights_2048.png, earth_clouds_2048.png,
+    earth_normal_2048.jpg, earth_specular_2048.jpg, moon_1024.jpg
+    https://github.com/mrdoob/three.js
+  Miroirs jsDelivr de textures Solar System Scope (vérifiés HTTP 200) :
+    https://cdn.jsdelivr.net/gh/rajpatel5/Solar-System@master/
+    https://cdn.jsdelivr.net/gh/Daniel-Geo/solar-system@main/textures/
+    https://cdn.jsdelivr.net/gh/Shrey1803/Solar-system@main/textures/
+  Anneau de Saturne : URL directe Solar System Scope (pas d'en-tête CORS ;
+  utilisé uniquement si le fichier local manque et si le navigateur l'autorise).
+
+PLUTON
+------
+Texture procédurale générée dans index.html. Aucune texture officielle de
+Pluton n'est redistribuée. Anneaux d'Uranus : procéduraux.
+
+MOTEUR
+------
+three.js 0.160.0 — https://threejs.org — licence MIT.
+Chargé depuis cdn.jsdelivr.net (version fixée), modules OrbitControls,
+EffectComposer, RenderPass, UnrealBloomPass, OutputPass, CSS2DRenderer.
+
+ÉPHÉMÉRIDES
+-----------
+NASA/JPL — E. M. Standish, "Keplerian Elements for Approximate Positions of the
+Major Planets", table 1 (1800-2050), éléments et taux par siècle.
+https://ssd.jpl.nasa.gov/planets/approx_pos.html
+
+Lune — J. Meeus, Astronomical Algorithms, chapitre 47 (série tronquée
+ELP 2000/82), inclinaison, excentricité et précession du nœud.
+Référence de validation : exemple 47.a (1992-04-12 0h TD), lambda =
+133,162655°, beta = -3,229126°, distance = 368 409,7 km.
+
+Orientations des pôles et méridiens — valeurs IAU 2015 (Working Group on
+Cartographic Coordinates and Rotational Elements).
+
+Précession de l'axe terrestre — formule approchée de la précession générale
+en longitude, pour rattacher les équinoxes/solstices au calendrier.
+
+Comète 1P/Halley — éléments osculateurs du périhélie de 1986
+(q = 0,585979 UA, e = 0,9671429, i = 162,26269°, Omega = 58,42008°,
+omega = 111,33249°, périhélie 1986-02-09).
+
+Données physiques (rayons, rotations, inclinaisons, températures) —
+NASA Planetary Fact Sheet et fiches planétaires NASA/JPL.
+Nombres de lunes confirmées : état 2025 (les nombres évoluent avec les
+découvertes ; seules les lunes majeures listées sont simulées).
+
+DONNÉES ET CODE
+---------------
+Les fonctions pures (JD, Kepler, rotations, Meeus, Halley, précession) sont
+regroupées dans index.html entre les marqueurs ASTRO-PURE-BEGIN/END et
+exposées via window.__ORBITAL__. Aucune intégration orbitale incrémentale.
+
+ACCURACY / LIMITES
+------------------
+- Éléments planétaires Standish table 1 : précision typique de l'ordre de
+  quelques 10^-4 UA à 10^-3 UA sur 1800-2050 (soit ~10^4-10^5 km), selon
+  le JPL. Les positions affichées restent bien meilleures que le pixel.
+- Lune : série Meeus tronquée, précision de l'ordre de la minute d'arc et
+  quelques dizaines de km sur la distance.
+- Lunes majeures : orbites circulaires simplifiées dans le plan équatorial
+  du parent ; périodes, demi-grands axes et inclinaisons réels, phases
+  initiales approchées. Pas d'éphémérides haute précision.
+- Pas de perturbations mutuelles, pas de marées, pas de précession des pôles
+  des autres planètes, pas de renflement équatorial.
+- Ombres : analytiques planète <-> anneaux de Saturne ; éclipses lunaires
+  prises en compte par assombrissement du shader lunaire ; éclipses solaires
+  détectées et signalées, sans carte d'ombre projetée au sol.
+- Éclairage 1/d^2 en mode réaliste ; exposition adaptée à l'astre suivi.
+- Mode pédagogique : distances et rayons non physiques (indiqué dans l'UI).
+- Astéroïdes/comètes/lunes non à l'échelle visuelle.
+
+LICENCE DU CODE
+---------------
+Code original fourni pour ce projet. Les composants tiers conservent leurs
+licences respectives (CC BY 4.0 pour les textures Solar System Scope, MIT
+pour three.js).
+
+RÉCUPÉRATION DES TEXTURES
+-------------------------
+download_textures.py (Python 3 + Pillow) télécharge les 18 fichiers vérifiés
+ci-dessus, contrôle HTTP 200 / type image / taille minimale, convertit les TIF
+en PNG, réduit les cartes 8K Terre et Voie lactée à 4K, puis affiche un résumé
+OK/ÉCHEC par fichier. Testé : 18/18 OK. Les URLs de secours jsDelivr/three.js
+restent configurées dans index.html si les fichiers locaux sont absents.
+
+MÉTÉO RÉELLE DE LA TERRE (section 8)
+------------------------------------
+NASA GIBS / EOSDIS — domaine public.
+  Capacités WMTS EPSG:4326 lues à l'exécution du développement :
+  https://gibs.earthdata.nasa.gov/wmts/epsg4326/best/1.0.0/WMTSCapabilities.xml
+  Couche archive utilisée : MODIS_Terra_CorrectedReflectance_TrueColor
+  (repli MODIS_Aqua_CorrectedReflectance_TrueColor), matrice 250m, zoom 2,
+  tuiles 512x512, date YYYY-MM-DD, CORS vérifié (Access-Control-Allow-Origin: *).
+  Les zones noires (absence de données MODIS) sont rendues transparentes et
+  fusionnées avec la carte statique. Les tuiles GOES-East/West et Himawari
+  existent et répondent (HTTP 200/CORS), mais leur projection géostationnaire
+  n'est pas directement plaquable sur la sphère équirectangulaire ; elles ne
+  sont donc pas utilisées sur le globe. Ce point est signalé dans l'interface.
+
+Open-Meteo — gratuit, non commercial, sans clé.
+  https://api.open-meteo.com/v1/forecast
+  - Nébulosité mondiale : grille 20° (162 points), requêtes par lots,
+    interpolation bilinéaire, rafraîchissement 12 min. CORS vérifié.
+  - Conditions locales au clic : temperature_2m, wind_speed_10m,
+    surface_pressure, cloud_cover, fuseau GMT.
+  - En cas de HTTP 429 (limite de débit), cache de la dernière texture live,
+    nouvel essai ponctuel et repli procédural documenté.
+
+Règle temporelle : |date simulée - maintenant| <= 3 h = direct ; date passée
+= archive GIBS si une mosaïque existe (>= 2000) ; date future ou archive
+indisponible = nuages procéduraux et badge explicite. Aucune météo réelle n'est
+affichée pour une date non valide.
+
+MÉTÉO SOLAIRE (section 9)
+-------------------------
+NASA SDO — domaine public.
+  Images 193 Å, 304 Å et HMIIC, 2048 px :
+  https://sdo.gsfc.nasa.gov/assets/img/latest/latest_2048_0193.jpg
+  https://sdo.gsfc.nasa.gov/assets/img/latest/latest_2048_0304.jpg
+  https://sdo.gsfc.nasa.gov/assets/img/latest/latest_2048_HMIIC.jpg
+  Les en-têtes CORS sont absents : les images sont affichées dans un panneau
+  2D (balise img, aucun besoin CORS). Aucun contournement. La sphère solaire 3D
+  reste un shader procédural, piloté par les données NOAA ; elle n'utilise pas
+  SDO comme texture WebGL.
+
+NOAA SWPC — domaine public, CORS vérifié.
+  https://services.swpc.noaa.gov
+  - /json/goes/primary/xray-flares-latest.json
+  - /json/goes/primary/xrays-1-day.json
+  - /json/solar_probabilities.json
+  - /products/noaa-planetary-k-index.json
+  - /products/noaa-scales.json
+  - /products/alerts.json
+  - /json/ovation_aurora_latest.json
+  - /text/3-day-forecast.txt
+  - Vent solaire : /json/rtsw/rtsw_wind_1m.json
+  - Champ magnétique : /json/rtsw/rtsw_mag_1m.json
+  Les URL de la spécification /products/solar-wind/plasma-2-hour.json et
+  /products/solar-wind/mag-2-hour.json répondent 404 (vérifié) ; les flux
+  RTSW ci-dessus, actifs, sont utilisés à la place.
+
+Effets : éruption M/X récente < 2 h = flash localisé + boucle, pic de bloom ;
+vent solaire = particules Soleil→Terre animées, vitesse proportionnelle ;
+Ovation + Kp = aurores côté nuit ; G3+ = compression visuelle de la
+magnétosphère. Hors ±3 h de la date réelle, effets réels désactivés et badge
+« activité solaire simulée ». SDO reste visible en 2D avec la mention
+« hors date simulée ».
+
+ROTATION SOLAIRE
+----------------
+Rotation équatoriale portée par le mesh (25,38 j), petite dérive
+différentielle bornée dans le shader (approximation visuelle de la rotation
+plus lente aux pôles). La date simulée pilote l'angle.
+
+LIMITES DES MODULES MÉTÉO
+-------------------------
+- La nébulosité Open-Meteo est une couverture nuageuse, pas une imagerie
+  satellite ; la texture est enrichie du détail procédural existant.
+- La grille 20° est volontairement grossière (limites de débit Open-Meteo).
+- L'archive GIBS dépend de la disponibilité quotidienne des tuiles ; les trous
+  MODIS restent transparents.
+- Les tuiles GOES/Himawari ne sont pas reprojetées (pas d'algorithme de
+  reprojection géostationnaire dans cette page).
+- Les emplacements des éruptions ne sont pas fournis par
+  xray-flares-latest.json ; le flash 3D est donc indicatif, le panneau SDO
+  montre l'image réelle.
+- Les données NOAA/SDO sont les dernières disponibles, pas des archives
+  datées ; hors date simulée, elles ne pilotent aucun effet.
+- Aucun proxy n'a été nécessaire : NOAA, GIBS et Open-Meteo autorisent le CORS.

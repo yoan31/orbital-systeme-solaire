@@ -482,6 +482,7 @@ input[type=range]:focus-visible::-webkit-slider-thumb{outline:2px solid #fff}
     <label class="switch-row"><span>Vecteurs vitesse</span><span class="sw"><input type="checkbox" data-layer="velocity"><i></i></span></label>
     <label class="switch-row"><span>Axes de rotation</span><span class="sw"><input type="checkbox" data-layer="axes"><i></i></span></label>
     <label class="switch-row"><span>Ceintures</span><span class="sw"><input type="checkbox" data-layer="belts" checked><i></i></span></label>
+    <label class="switch-row"><span>Comètes</span><span class="sw"><input type="checkbox" data-layer="comets" checked><i></i></span></label>
     <label class="switch-row"><span>Satellites majeurs</span><span class="sw"><input type="checkbox" data-layer="satellites" checked><i></i></span></label>
     <label class="switch-row"><span>Atmosphères</span><span class="sw"><input type="checkbox" data-layer="atmospheres" checked><i></i></span></label>
     <label class="switch-row"><span>Météo réelle</span><span class="sw"><input id="earthWeatherSwitch" type="checkbox" checked><i></i></span></label>
@@ -1470,7 +1471,7 @@ const state = {
   mode: 'ped', selected: 'sun', follow: null, pendingFollow: null,
   quality: 'auto', tier: 'high', fps: 60, lastQualityCheck: 0, autoDowngrades: 0,
   outOfRange: false, outOfRangeWarned: false,
-  layers: { orbits: true, labels: true, grid: false, velocity: false, axes: false, belts: true, satellites: true, atmospheres: true, earthWeather: true, solarWeather: true },
+  layers: { orbits: true, labels: true, grid: false, velocity: false, axes: false, belts: true, comets: true, satellites: true, atmospheres: true, earthWeather: true, solarWeather: true },
   timeElapsed: 0
 };
 
@@ -3308,6 +3309,8 @@ function updateVelocities() {
   for (const key of PLANET_KEYS.concat(COMET_KEYS)) {
     const obj = bodyObjects[key];
     if (!obj || !obj.velocityArrow) continue;
+    if (!state.layers.comets && COMET_BY_KEY[key]) { obj.velocityArrow.visible = false; continue; }
+    obj.velocityArrow.visible = true;
     const st = ephemeris[key];
     const camDist = camera.position.distanceTo(obj.worldPos);
     const len = state.mode === 'real'
@@ -3330,7 +3333,7 @@ function updateOrbitVisibility() {
   for (const key of Object.keys(orbitElements)) {
     const el = orbitElements[key];
     if (!el || !el.line) continue;
-    el.line.visible = state.layers.orbits && (!close || !!COMET_BY_KEY[sel]);
+    el.line.visible = state.layers.orbits && (!close || !!COMET_BY_KEY[sel]) && (state.layers.comets || !COMET_BY_KEY[key]);
   }
   if (gridGroup) gridGroup.visible = state.layers.grid && !close;
 }
@@ -3611,6 +3614,7 @@ function updateListActive() {
 
 function selectBody(key, doFocus) {
   if (!BODY_INFO[key]) return;
+  if (!state.layers.comets && COMET_BY_KEY[key]) return;
   state.selected = key;
   updateListActive();
   updateInfo(true);
@@ -3801,6 +3805,12 @@ function applyLayers() {
   if (velocityGroup) velocityGroup.visible = L.velocity;
   if (beltMain) beltMain.visible = L.belts;
   if (beltKuiper) beltKuiper.visible = L.belts;
+  for (const key of COMET_KEYS) {
+    const obj = bodyObjects[key];
+    if (obj) obj.group.visible = L.comets;
+    const row = dom.bodyList.querySelector('.body-item[data-key="' + key + '"]');
+    if (row) row.classList.toggle('hidden', !L.comets);
+  }
   for (const key of Object.keys(bodyObjects)) {
     const obj = bodyObjects[key];
     if (obj.label) obj.label.visible = L.labels;
@@ -3823,7 +3833,7 @@ function updateLabelVisibility() {
   const labels = [];
   const add = (key, obj) => {
     if (!obj || !obj.label) return;
-    if (!L.labels) { obj.label.visible = false; return; }
+    if (!L.labels || (!L.comets && !!COMET_BY_KEY[key])) { obj.label.visible = false; return; }
     if (state.mode === 'real') {
       projTmp.copy(obj.worldPos).project(camera);
       if (projTmp.z < -1 || projTmp.z > 1) { obj.label.visible = false; return; }
@@ -3893,6 +3903,7 @@ dom.modeSeg.querySelectorAll('button').forEach(btn => {
 document.querySelectorAll('[data-layer]').forEach(input => {
   input.addEventListener('change', () => {
     state.layers[input.dataset.layer] = input.checked;
+    if (!state.layers.comets && COMET_BY_KEY[state.selected]) selectBody('sun', false);
     applyLayers();
     updateLabelVisibility();
   });
@@ -3977,9 +3988,14 @@ renderer.domElement.addEventListener('pointerup', e => {
   pointer.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
   raycaster.setFromCamera(pointer, camera);
   const hits = raycaster.intersectObjects(pickables, false);
-  if (hits.length) {
-    if (typeof handleWeatherClick === 'function') handleWeatherClick(hits[0]);
-    const key = hits[0].object.userData.bodyKey;
+  const hit = hits.find(h => {
+    const key = h.object.userData.bodyKey;
+    const obj = key && bodyObjects[key];
+    return !obj || obj.group.visible;
+  });
+  if (hit) {
+    if (typeof handleWeatherClick === 'function') handleWeatherClick(hit);
+    const key = hit.object.userData.bodyKey;
     if (key) selectBody(key, true);
   }
 });

@@ -73,9 +73,27 @@ Cartographic Coordinates and Rotational Elements).
 Précession de l'axe terrestre — formule approchée de la précession générale
 en longitude, pour rattacher les équinoxes/solstices au calendrier.
 
-Comète 1P/Halley — éléments osculateurs du périhélie de 1986
-(q = 0,585979 UA, e = 0,9671429, i = 162,26269°, Omega = 58,42008°,
-omega = 111,33249°, périhélie 1986-02-09).
+Comètes — éléments osculateurs héliocentriques (repère écliptique J2000) à
+l'époque 2026-11-08, et passages au périhélie relevés sur JPL Horizons :
+
+  1P/Halley             e 0,968038  a  17,8596 UA  i 162,1939°  q 0,5708 UA
+  2P/Encke              e 0,847325  a   2,2177 UA  i  11,3478°  q 0,3386 UA
+  67P/Churyumov-Ger.    e 0,649468  a   3,4590 UA  i   3,8660°  q 1,2125 UA
+  109P/Swift-Tuttle     e 0,963372  a  26,1730 UA  i 112,8404°  q 0,9587 UA
+  C/1995 O1 (Hale-Bopp) e 0,994887  a 181,2603 UA  i  89,7315°  q 0,9268 UA
+
+Les passages au périhélie proviennent des vecteurs héliocentriques quotidiens
+de Horizons (minimum de la distance au Soleil) ; la phase entre deux passages
+est interpolée, ce qui absorbe les variations réelles de période (jusqu'à
+plusieurs jours par tour). Les rayons des noyaux sont des valeurs moyennes
+publiées (Halley 5,5 km, Encke 2,4 km, 67P 2,0 km, Swift-Tuttle 13 km,
+Hale-Bopp 30 km).
+
+Limite : aucune intégration N-corps ni effet non gravitationnel. La conique
+est exacte autour de l'époque des éléments (< 0,06 UA d'écart avec Horizons
+entre 2000 et 2050) et s'en écarte en s'éloignant de cette date ; 67P est le
+cas extrême, son orbite ayant été modifiée par Jupiter en 1959 (plusieurs UA
+d'écart avant cette date).
 
 Données physiques (rayons, rotations, inclinaisons, températures) —
 NASA Planetary Fact Sheet et fiches planétaires NASA/JPL.
@@ -84,7 +102,7 @@ découvertes ; seules les lunes majeures listées sont simulées).
 
 DONNÉES ET CODE
 ---------------
-Les fonctions pures (JD, Kepler, rotations, Meeus, Halley, précession) sont
+Les fonctions pures (JD, Kepler, rotations, Meeus, comètes, précession) sont
 regroupées dans index.html entre les marqueurs ASTRO-PURE-BEGIN/END et
 exposées via window.__ORBITAL__. Aucune intégration orbitale incrémentale.
 

@@ -608,7 +608,7 @@ input[type=range]:focus-visible::-webkit-slider-thumb{outline:2px solid #fff}
       <li><b>NASA/JPL</b> — E. M. Standish, <i>Keplerian Elements for Approximate Positions of the Major Planets</i>, table 1 (1800–2050), éléments et taux par siècle.</li>
       <li><b>Lune</b> — modèle analytique tronqué de J. Meeus, <i>Astronomical Algorithms</i>, ch. 47 ; nœud rétrograde et inclinaison inclus.</li>
       <li><b>Orientations</b> — pôles et méridiens IAU 2015 ; précession terrestre approchée pour les saisons.</li>
-      <li><b>Comète 1P/Halley</b> — éléments osculateurs du périhélie 1986 (JPL/IAU).</li>
+      <li><b>Comètes</b> — 1P/Halley, 2P/Encke, 67P/Churyumov-Gerasimenko, 109P/Swift-Tuttle, C/1995 O1 (Hale-Bopp) : éléments osculateurs JPL Horizons à l'époque 2026-11-08, phase calée sur les passages au périhélie observés.</li>
       <li><b>Données physiques</b> — NASA Planetary Fact Sheet ; nombres de lunes confirmées (2025).</li>
     </ul>
     <h3>Météo réelle et météo solaire</h3>
@@ -905,12 +905,89 @@ const SATELLITES = [
   { key: 'triton',   parent: 'neptune', name: 'Triton',   radiusKm: 1353.4, aKm: 354759,   periodDays: -5.876854,   incl: 156.885, L0: 0,     color: 0xc7d6d8 }
 ];
 
-const HALLEY = {
-  name: 'Halley', e: 0.9671429085, qAU: 0.585979, incl: 162.26269, node: 58.42008, peri: 111.33249,
-  tpJD: 2446470.5 - 0.458 * 1.0, // 1986-02-09.458 TT ~ JD 2446470.958
-  periodDays: 27510
-};
-HALLEY.aAU = HALLEY.qAU / (1 - HALLEY.e);
+/* Comètes : éléments osculateurs héliocentriques au 2026-11-08 (JPL Horizons),
+   repère écliptique J2000. e/aAU/incl/node/peri = excentricité, demi-grand axe,
+   inclinaison, longitude du nœud ascendant, argument du périhélie.
+   perihelia = passages au périhélie relevés sur JPL Horizons ; la phase est
+   interpolée entre deux passages consécutifs (les périodes réelles varient de
+   plusieurs jours sous l'effet des perturbations planétaires). */
+const COMETS = [
+  { key: 'halley', name: '1P/Halley', label: 'Halley', type: 'Comète périodique', short: 'Comète',
+    color: '#a7f3d0', radiusKm: 5.5, rotationHours: 52.8, temp: '≈ 200 K (périhélie)',
+    e: 0.968038041, aAU: 17.859586, incl: 162.193926, node: 59.243836, peri: 112.144650,
+    tpJD: 2474038.9504, periodDays: 27568.0150,
+    perihelia: [2418781.597, 2446470.879, 2474034.268],
+    desc: "Ellipse très excentrique inclinée à 162° ; la vitesse suit la deuxième loi de Kepler : maximale au périhélie, minimale à l'aphélie. Retour attendu en 2061." },
+  { key: 'encke', name: '2P/Encke', label: 'Encke', type: 'Comète périodique', short: 'Comète',
+    color: '#f2c9a0', radiusKm: 2.4, rotationHours: 11.08, temp: '≈ 300 K (périhélie)',
+    e: 0.847324563, aAU: 2.217748, incl: 11.347809, node: 334.019320, peri: 187.288163,
+    tpJD: 2461446.7281, periodDays: 1206.3312,
+    perihelia: [
+      2397582.009, 2398785.378, 2399989.498, 2401196.157, 2402401.440, 2403606.982, 2404806.199, 2406006.353, 2407205.564, 2408411.765,
+      2409619.127, 2410826.736, 2412032.265, 2413237.426, 2414443.313, 2415648.872, 2416862.484, 2418067.477, 2419271.784, 2420475.926,
+      2421680.420, 2422887.353, 2424093.255, 2425298.984, 2426498.151, 2427698.098, 2428897.460, 2430103.400, 2431310.062, 2432517.379,
+      2433722.726, 2434927.203, 2436131.882, 2437336.956, 2438550.245, 2439756.270, 2440961.562, 2442167.023, 2443372.570, 2444580.042,
+      2445787.500, 2446994.168, 2448193.059, 2449392.918, 2450591.875, 2451797.381, 2453003.371, 2454209.642, 2455415.288, 2456618.243,
+      2457822.381, 2459026.612, 2460239.823, 2461446.959, 2462653.625, 2463859.247, 2465066.443, 2466274.876, 2467482.412, 2468690.451,
+      2469890.123, 2471090.529, 2472290.031, 2473495.175],
+    desc: "La comète périodique la plus rapide : un tour en 3,3 ans, sur une orbite courte et peu inclinée. Son noyau d'environ 4,8 km de diamètre alimente l'essaim météoritique des Taurides." },
+  { key: 'churyumov', name: '67P/Churyumov-Gerasimenko', label: '67P', type: 'Comète périodique', short: 'Comète',
+    color: '#cdb8f2', radiusKm: 2.0, rotationHours: 12.4, temp: '≈ 205 K (périhélie)',
+    e: 0.649467876, aAU: 3.458981, incl: 3.865983, node: 36.285609, peri: 22.239806,
+    tpJD: 2461871.0621, periodDays: 2349.7448,
+    perihelia: [
+      2438083.479, 2440475.569, 2442875.758, 2445285.618, 2447695.905, 2450100.155, 2452504.816, 2454890.858, 2457247.589, 2459520.556,
+      2461871.122, 2464269.388, 2466688.759, 2469109.917, 2471531.206, 2473952.855],
+    desc: "Cible de la mission Rosetta (2014-2016) : noyau bilobé d'environ 4 × 3 km, coma et jets observés in situ. Comète de la famille de Jupiter, période de 6,4 ans." },
+  { key: 'swifttuttle', name: '109P/Swift-Tuttle', label: 'Swift-Tuttle', type: 'Comète périodique', short: 'Comète',
+    color: '#9fd3ea', radiusKm: 13.0, rotationHours: 0, temp: '≈ 200 K (périhélie)',
+    e: 0.963371998, aAU: 26.173044, incl: 112.840426, node: 139.901808, peri: 153.235484,
+    tpJD: 2448973.6810, periodDays: 48907.9869,
+    perihelia: [2401375.942, 2448968.821, 2497757.889],
+    desc: "Le plus gros noyau cométaire périodique connu (~26 km de diamètre), source de l'essaim des Perséides. Orbite rétrograde très inclinée et période d'environ 130 ans." },
+  { key: 'halebopp', name: 'C/1995 O1 (Hale-Bopp)', label: 'Hale-Bopp', type: 'Comète à longue période', short: 'Comète',
+    color: '#f2b8d3', radiusKm: 30.0, rotationHours: 11.35, temp: '≈ 190 K (périhélie)',
+    e: 0.994887146, aAU: 181.260279, incl: 89.731462, node: 281.814145, peri: 130.737557,
+    tpJD: 2450536.5239, periodDays: 891358.4659,
+    perihelia: [2450539.620],
+    desc: "La « grande comète » de 1997, visible à l'œil nu pendant dix-huit mois. Noyau d'environ 60 km, orbite quasi perpendiculaire à l'écliptique (89°) et période de l'ordre de 2 400 ans." }
+];
+const COMET_KEYS = COMETS.map(c => c.key);
+const COMET_BY_KEY = {};
+for (const c of COMETS) COMET_BY_KEY[c.key] = c;
+
+// Anomalie moyenne : phase interpolée entre les passages au périhélie observés,
+// puis extrapolée avec l'intervalle le plus proche de la date demandée.
+function cometMeanAnomaly(c, jd) {
+  const P = c.perihelia;
+  if (!P || P.length === 0) return 2 * Math.PI * (jd - c.tpJD) / c.periodDays;
+  if (P.length === 1) return 2 * Math.PI * (jd - P[0]) / c.periodDays;
+  if (jd <= P[0]) return 2 * Math.PI * (jd - P[0]) / (P[1] - P[0]);
+  for (let k = P.length - 1; k >= 1; k--) {
+    if (jd >= P[k - 1] && jd < P[k]) return 2 * Math.PI * (jd - P[k - 1]) / (P[k] - P[k - 1]);
+  }
+  const n = P.length;
+  return 2 * Math.PI * (jd - P[n - 1]) / (P[n - 1] - P[n - 2]);
+}
+
+// Passages au périhélie encadrant une date donnée.
+function cometPerihelionWindow(c, jd) {
+  const P = c.perihelia;
+  if (P && P.length === 1) {
+    const k = Math.floor((jd - P[0]) / c.periodDays);
+    const last = P[0] + k * c.periodDays;
+    return { last, next: last + c.periodDays };
+  }
+  if (P && P.length >= 2) {
+    if (jd < P[0]) return { last: P[0], next: P[1] };
+    for (let k = P.length - 1; k >= 0; k--) {
+      if (P[k] <= jd) return { last: P[k], next: P[k + 1] !== undefined ? P[k + 1] : P[k] + c.periodDays };
+    }
+  }
+  const k = Math.floor((jd - c.tpJD) / c.periodDays);
+  const last = c.tpJD + k * c.periodDays;
+  return { last, next: last + c.periodDays };
+}
 
 function normalizeDeg(x) { let v = x % 360; if (v < 0) v += 360; return v; }
 function degToRad(d) { return d * DEG; }
@@ -924,6 +1001,10 @@ function jdToDateParts(jd) {
   return { year: dt.getUTCFullYear(), month: dt.getUTCMonth() + 1, day: dt.getUTCDate(), hour: dt.getUTCHours(), minute: dt.getUTCMinutes(), second: dt.getUTCSeconds(), ms: dt.getUTCMilliseconds() };
 }
 function centuriesSinceJ2000(jd) { return (jd - J2000) / DAYS_PER_CENTURY; }
+function formatDateShort(jd) {
+  const p = jdToDateParts(jd);
+  return p.year + '-' + pad2(p.month) + '-' + pad2(p.day);
+}
 
 function solveKepler(M, e, tol) {
   tol = tol || 1e-8;
@@ -1147,15 +1228,13 @@ function satelliteOffsetAU(sat, jd, parentPoleEq, out) {
   return out;
 }
 
-function halleyState(jd, out) {
+function cometState(c, jd, out) {
   out = out || {};
-  const a = HALLEY.aAU, e = HALLEY.e;
-  const n = 2 * Math.PI / HALLEY.periodDays;
-  const M = n * (jd - HALLEY.tpJD);
-  const E = solveKepler(M, e, 1e-9);
+  const a = c.aAU, e = c.e;
+  const E = solveKepler(cometMeanAnomaly(c, jd), e, 1e-9);
   const xp = a * (Math.cos(E) - e);
   const yp = a * Math.sqrt(1 - e * e) * Math.sin(E);
-  const w = degToRad(HALLEY.peri), O = degToRad(HALLEY.node), I = degToRad(HALLEY.incl);
+  const w = degToRad(c.peri), O = degToRad(c.node), I = degToRad(c.incl);
   const cw = Math.cos(w), sw = Math.sin(w), cO = Math.cos(O), sO = Math.sin(O), ci = Math.cos(I), si = Math.sin(I);
   out.x = xp * (cw * cO - sw * sO * ci) + yp * (-sw * cO - cw * sO * ci);
   out.y = xp * (cw * sO + sw * cO * ci) + yp * (-sw * sO + cw * cO * ci);
@@ -1168,7 +1247,7 @@ function halleyState(jd, out) {
   out.vy = vxp * (cw * sO + sw * cO * ci) + vyp * (-sw * sO + cw * cO * ci);
   out.vz = vxp * (sw * si) + vyp * (cw * si);
   out.v = Math.sqrt(out.vx * out.vx + out.vy * out.vy + out.vz * out.vz) * AU_KM / 86400;
-  out.periodDays = HALLEY.periodDays;
+  out.periodDays = c.periodDays;
   return out;
 }
 
@@ -1339,11 +1418,11 @@ function checkSubsolarReference(verbose) {
    - Lune, exemple 47.a de Meeus (1992-04-12 0h TD) : lambda 133.162655°,
      beta -3.229126°, distance 368 427.8 km (réf. 368 409.7 km).
    - Périhélie terrestre 2025-01-04 : r = 0.983307 UA.
-   - 1P/Halley au périhélie : 54.57 km/s (2e loi de Kepler, vis-viva).
+   - 1P/Halley au périhélie : 54.6 km/s pour q = 0.586 UA (vis-viva).
    Erreur attendue : planètes ~10^-4 à 10^-3 UA (10^4-10^5 km) sur 1800-2050 ;
    Lune ~1 minute d'arc et quelques dizaines de km ; lunes majeures simplifiées. */
 // === ASTRO-PURE-END ===
-const BODY_LIST = ['sun','mercury','venus','earth','moon','mars','jupiter','saturn','uranus','neptune','pluto','halley'];
+const BODY_LIST = ['sun','mercury','venus','earth','moon','mars','jupiter','saturn','uranus','neptune','pluto'].concat(COMET_KEYS);
 const PLANET_KEYS = ['mercury','venus','earth','mars','jupiter','saturn','uranus','neptune','pluto'];
 
 const BODY_INFO = {
@@ -1368,10 +1447,14 @@ const BODY_INFO = {
   neptune: { name: 'Neptune', type: 'Géante de glace', short: 'Glace', color: '#4b6fd8', radiusKm: 24622, tilt: 28.32, rotationHours: 16.11, moons: 16, temp: '−200 °C (1 bar)',
     desc: "Vents les plus rapides du système solaire. Triton, sa grande lune, orbite en sens rétrograde (période négative)." },
   pluto: { name: 'Pluton', type: 'Planète naine', short: 'Naine', color: '#c9b8a6', radiusKm: 1188.3, tilt: 122.53, rotationHours: -153.2928, moons: 5, temp: '−229 °C',
-    desc: "Bonus : planète naine à l'orbite très inclinée (17,1°) et excentrique, en résonance 2:3 avec Neptune. Texture procédurale faute de texture officielle redistribuée." },
-  halley: { name: '1P/Halley', type: 'Comète périodique', short: 'Comète', color: '#a7f3d0', radiusKm: 5.5, tilt: 0, rotationHours: 52.8, moons: 0, temp: '≈ 200 K (périhélie)',
-    desc: "Ellipse très excentrique (e = 0,967) inclinée à 162°. La vitesse suit la deuxième loi de Kepler : maximale au périhélie, minimale à l'aphélie. Retour attendu en 2061." }
+    desc: "Bonus : planète naine à l'orbite très inclinée (17,1°) et excentrique, en résonance 2:3 avec Neptune. Texture procédurale faute de texture officielle redistribuée." }
 };
+for (const c of COMETS) {
+  BODY_INFO[c.key] = {
+    name: c.name, type: c.type, short: c.short, color: c.color, radiusKm: c.radiusKm,
+    tilt: 0, rotationHours: c.rotationHours, moons: 0, temp: c.temp, cometKey: c.key, desc: c.desc
+  };
+}
 for (const sat of SATELLITES) {
   const parent = BODY_INFO[sat.parent];
   BODY_INFO[sat.key] = {
@@ -2333,7 +2416,7 @@ const ephemeris = {};
 const satelliteEphemeris = {};
 const moonGeo = {};
 for (const key of PLANET_KEYS) ephemeris[key] = { el: {} };
-ephemeris.halley = {};
+for (const key of COMET_KEYS) ephemeris[key] = {};
 for (const sat of SATELLITES) satelliteEphemeris[sat.key] = {};
 const orbitElements = {};
 
@@ -2356,7 +2439,7 @@ const zero = new THREE.Vector3(0, 0, 0);
 const atmoMeshes = [];
 const pickables = [];
 let skyGroup, skyMesh, starsMesh, orbitGroup, gridGroup, velocityGroup;
-let sunObj, moonObj, cometObj, beltMain, beltKuiper, beltMaterial;
+let sunObj, moonObj, beltMain, beltKuiper, beltMaterial;
 let sunLight, ambientLight;
 let glowTexture;
 
@@ -2586,23 +2669,24 @@ function createSatellites() {
   }
 }
 
-function createComet() {
-  const group = new THREE.Group();
-  const mat = new THREE.MeshStandardMaterial({ color: 0x5b6b6a, emissive: 0x0d2a25, emissiveIntensity: 1.2, roughness: 1 });
-  const mesh = new THREE.Mesh(geoLow, mat);
-  mesh.userData.bodyKey = 'halley';
-  group.add(mesh);
-  const glow = new THREE.Sprite(new THREE.SpriteMaterial({
-    map: glowTexture, color: 0xa7f3d0, transparent: true, opacity: 0.55,
-    blending: THREE.AdditiveBlending, depthWrite: false
-  }));
-  group.add(glow);
-  const label = makeLabel('Halley', 'halley', true);
-  group.add(label);
-  scene.add(group);
-  pickables.push(mesh);
-  cometObj = { key: 'halley', group, mesh, material: mat, glow, label, radiusWorld: 1, worldPos: new THREE.Vector3() };
-  bodyObjects.halley = cometObj;
+function createComets() {
+  for (const c of COMETS) {
+    const group = new THREE.Group();
+    const mat = new THREE.MeshStandardMaterial({ color: 0x5b6b6a, emissive: 0x0d2a25, emissiveIntensity: 1.2, roughness: 1 });
+    const mesh = new THREE.Mesh(geoLow, mat);
+    mesh.userData.bodyKey = c.key;
+    group.add(mesh);
+    const glow = new THREE.Sprite(new THREE.SpriteMaterial({
+      map: glowTexture, color: new THREE.Color(c.color), transparent: true, opacity: 0.55,
+      blending: THREE.AdditiveBlending, depthWrite: false
+    }));
+    group.add(glow);
+    const label = makeLabel(c.label, c.key, true);
+    group.add(label);
+    scene.add(group);
+    pickables.push(mesh);
+    bodyObjects[c.key] = { key: c.key, comet: c, group, mesh, material: mat, glow, label, radiusWorld: 1, worldPos: new THREE.Vector3() };
+  }
 }
 
 function buildSky(tex) {
@@ -2714,11 +2798,11 @@ function makeBeltGeometry(count, inner, outer, eScale, incMax, tintA, tintB, kir
 function buildOrbits() {
   orbitGroup = new THREE.Group();
   bgScene.add(orbitGroup);
-  for (const key of PLANET_KEYS.concat(['halley'])) {
+  for (const key of PLANET_KEYS.concat(COMET_KEYS)) {
     const color = new THREE.Color(BODY_INFO[key].color);
     const geo = new THREE.BufferGeometry();
     geo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(513 * 3), 3));
-    const dim = color.clone().multiplyScalar(key === 'halley' ? 0.72 : 0.48);
+    const dim = color.clone().multiplyScalar(COMET_BY_KEY[key] ? 0.72 : 0.48);
     const mat = new THREE.LineBasicMaterial({ color: dim, transparent: false, depthTest: false, depthWrite: false });
     const line = new THREE.Line(geo, mat);
     line.frustumCulled = false;
@@ -2752,10 +2836,11 @@ function updateOrbitLines() {
     }
     entry.line.geometry.attributes.position.needsUpdate = true;
   }
-  const h = orbitElements.halley;
-  if (h) {
+  for (const c of COMETS) {
+    const h = orbitElements[c.key];
+    if (!h) continue;
     const arr = h.line.geometry.attributes.position.array;
-    const a = HALLEY.aAU, e = HALLEY.e, w = degToRad(HALLEY.peri), O = degToRad(HALLEY.node), I = degToRad(HALLEY.incl);
+    const a = c.aAU, e = c.e, w = degToRad(c.peri), O = degToRad(c.node), I = degToRad(c.incl);
     const cw = Math.cos(w), sw = Math.sin(w), cO = Math.cos(O), sO = Math.sin(O), ci = Math.cos(I), si = Math.sin(I);
     for (let i = 0; i <= h.points; i++) {
       const E = (i / h.points) * Math.PI * 2;
@@ -2806,7 +2891,7 @@ function buildGrid() {
 function buildVelocity() {
   velocityGroup = new THREE.Group();
   scene.add(velocityGroup);
-  for (const key of PLANET_KEYS.concat(['halley'])) {
+  for (const key of PLANET_KEYS.concat(COMET_KEYS)) {
     const color = new THREE.Color(BODY_INFO[key].color);
     const arrow = new THREE.ArrowHelper(new THREE.Vector3(0, 1, 0), new THREE.Vector3(), 1, color, 0.22, 0.12);
     arrow.line.material.transparent = false;
@@ -2825,7 +2910,7 @@ function buildScene(tex) {
   for (const key of PLANET_KEYS) createPlanet(key, tex);
   createMoon(tex);
   createSatellites();
-  createComet();
+  createComets();
   buildBelts();
   buildOrbits();
   buildGrid();
@@ -2969,7 +3054,7 @@ function updateEphemeris(jd) {
     );
     out.speed = (2 * Math.PI * sat.aKm) / (Math.abs(sat.periodDays) * 86400);
   }
-  halleyState(jd, ephemeris.halley);
+  for (const c of COMETS) cometState(c, jd, ephemeris[c.key]);
   const ex = ephemeris.earth.x, ey = ephemeris.earth.y, ez = ephemeris.earth.z;
   for (const key of PLANET_KEYS) {
     const st = ephemeris[key];
@@ -2977,7 +3062,10 @@ function updateEphemeris(jd) {
     st.sunDistAU = st.r;
   }
   moonGeo.distEarthAU = moonGeo.distKm / AU_KM;
-  ephemeris.halley.distEarthAU = Math.sqrt((ephemeris.halley.x - ex) ** 2 + (ephemeris.halley.y - ey) ** 2 + (ephemeris.halley.z - ez) ** 2);
+  for (const c of COMETS) {
+    const st = ephemeris[c.key];
+    st.distEarthAU = Math.sqrt((st.x - ex) ** 2 + (st.y - ey) ** 2 + (st.z - ez) ** 2);
+  }
 }
 
 function applyScales() {
@@ -3017,10 +3105,14 @@ function applyScales() {
     obj.label.position.y = r * 1.55 + (state.mode === 'real' ? 0.003 : 0.07);
   }
 
-  cometObj.radiusWorld = state.mode === 'real' ? 0.0008 : 0.05;
-  cometObj.mesh.scale.setScalar(cometObj.radiusWorld);
-  cometObj.glow.scale.setScalar(state.mode === 'real' ? 0.012 : 0.32);
-  cometObj.label.position.y = cometObj.radiusWorld * 2.5 + (state.mode === 'real' ? 0.01 : 0.3);
+  for (const c of COMETS) {
+    const obj = bodyObjects[c.key];
+    if (!obj) continue;
+    obj.radiusWorld = state.mode === 'real' ? 0.0008 : 0.05;
+    obj.mesh.scale.setScalar(obj.radiusWorld);
+    obj.glow.scale.setScalar(state.mode === 'real' ? 0.012 : 0.32);
+    obj.label.position.y = obj.radiusWorld * 2.5 + (state.mode === 'real' ? 0.01 : 0.3);
+  }
 }
 
 function applyPositions() {
@@ -3055,10 +3147,15 @@ function applyPositions() {
     obj.mesh.rotation.y = Math.atan2(-obj.local.x, -obj.local.z);
   }
 
-  auToWorld(ephemeris.halley.x, ephemeris.halley.y, ephemeris.halley.z, tmpV);
-  cometObj.group.position.copy(tmpV);
-  cometObj.worldPos.copy(tmpV);
-  if (cometObj.glow) cometObj.glow.material.opacity = Math.min(0.9, 0.35 + 4.0 / Math.max(ephemeris.halley.r * ephemeris.halley.r, 0.2));
+  for (const c of COMETS) {
+    const st = ephemeris[c.key];
+    const obj = bodyObjects[c.key];
+    if (!obj) continue;
+    auToWorld(st.x, st.y, st.z, tmpV);
+    obj.group.position.copy(tmpV);
+    obj.worldPos.copy(tmpV);
+    if (obj.glow) obj.glow.material.opacity = Math.min(0.9, 0.35 + 4.0 / Math.max(st.r * st.r, 0.2));
+  }
 }
 
 function updateMoonEvents() {
@@ -3208,7 +3305,7 @@ function updateUniforms() {
 
 function updateVelocities() {
   if (!state.layers.velocity) return;
-  for (const key of PLANET_KEYS.concat(['halley'])) {
+  for (const key of PLANET_KEYS.concat(COMET_KEYS)) {
     const obj = bodyObjects[key];
     if (!obj || !obj.velocityArrow) continue;
     const st = ephemeris[key];
@@ -3233,7 +3330,7 @@ function updateOrbitVisibility() {
   for (const key of Object.keys(orbitElements)) {
     const el = orbitElements[key];
     if (!el || !el.line) continue;
-    el.line.visible = state.layers.orbits && (!close || sel === 'halley');
+    el.line.visible = state.layers.orbits && (!close || !!COMET_BY_KEY[sel]);
   }
   if (gridGroup) gridGroup.visible = state.layers.grid && !close;
 }
@@ -3241,8 +3338,8 @@ function updateOrbitVisibility() {
 function applyMode() {
   dom.modeSeg.querySelectorAll('button').forEach(b => b.classList.toggle('active', b.dataset.mode === state.mode));
   dom.scaleNote.innerHTML = state.mode === 'real'
-    ? '<b>Échelle réelle</b> : 1 UA = 400 unités, rayons et distances réels. Planètes minuscules à l’échelle du système ; astéroïdes et comète à taille symbolique.'
-    : '<b>Échelle pédagogique</b> : distances ∝ r<sup>0,55</sup>, rayons ∝ R<sup>0,4</sup>, orbites des lunes élargies. Volontairement non physique ; astéroïdes, lunes et comète à taille symbolique.';
+    ? '<b>Échelle réelle</b> : 1 UA = 400 unités, rayons et distances réels. Planètes minuscules à l’échelle du système ; astéroïdes et comètes à taille symbolique.'
+    : '<b>Échelle pédagogique</b> : distances ∝ r<sup>0,55</sup>, rayons ∝ R<sup>0,4</sup>, orbites des lunes élargies. Volontairement non physique ; astéroïdes, lunes et comètes à taille symbolique.';
   sunLight.decay = state.mode === 'real' ? 2 : 0;
   sunLight.intensity = state.mode === 'real' ? SUN_LIGHT_REAL : 1.5;
   applyScales();
@@ -3325,7 +3422,7 @@ function focusBody(key) {
   if (key === 'uranus' && obj.rings) r *= 1.9;
   let dist;
   if (key === 'sun') dist = state.mode === 'real' ? r * 5.0 : r * 3.2;
-  else if (key === 'halley') dist = state.mode === 'real' ? 0.16 : 3.2;
+  else if (COMET_BY_KEY[key]) dist = state.mode === 'real' ? 0.16 : 3.2;
   else if (key === 'moon' || satelliteEphemeris[key]) dist = state.mode === 'real' ? Math.max(r * 9.0, 0.03) : Math.max(r * 9.0, 2.4);
   else dist = state.mode === 'real' ? Math.max(r * 8.0, 0.035) : Math.max(r * 4.6, 1.1);
   if (key === 'sun') {
@@ -3567,15 +3664,19 @@ function updateInfo(force) {
     html += statRow('Vitesse orbitale', fmtSpeed(sat.speed), 'moyenne');
     html += statRow('Distance à la Terre', fmtAU(sat.distEarthAU), fmtKm(sat.distEarthAU * AU_KM));
     extra = '<span class="tag">Orbite circulaire simplifiée</span><span class="tag">Phase initiale approchée</span>';
-  } else if (key === 'halley') {
-    const st = ephemeris.halley;
+  } else if (COMET_BY_KEY[key]) {
+    const c = COMET_BY_KEY[key];
+    const st = ephemeris[key];
+    const win = cometPerihelionWindow(c, state.jd);
     html += statRow('Distance au Soleil', fmtAU(st.r), fmtKm(st.r * AU_KM));
     html += statRow('Vitesse orbitale', fmtSpeed(st.v), 'loi des aires');
-    html += statRow('Période orbitale', '75,32 ans', 'retour 2061');
-    html += statRow('Rayon du noyau', '≈ 5,5 km', 'forme irrégulière');
+    html += statRow('Période orbitale', fmtPeriod(c.periodDays), nfInt.format(c.periodDays) + ' jours');
+    html += statRow('Rayon du noyau', '≈ ' + nf2.format(c.radiusKm) + ' km', 'forme irrégulière');
     html += statRow('Distance à la Terre', fmtAU(st.distEarthAU), fmtKm(st.distEarthAU * AU_KM));
-    html += statRow('Excentricité', nf4.format(HALLEY.e), 'ellipse très excentrique');
-    extra = '<span class="tag">Inclinaison 162,26°</span><span class="tag">Périhélie 9 févr. 1986</span><span class="tag hot">Accélération au périhélie</span>';
+    html += statRow('Excentricité', nf4.format(c.e), c.e >= 0.99 ? 'orbite quasi parabolique' : 'ellipse très excentrique');
+    extra = '<span class="tag">Inclinaison ' + nf2.format(c.incl) + '°</span>' +
+      '<span class="tag">Périhélie ' + formatDateShort(win.last) + '</span>' +
+      '<span class="tag hot">Prochain retour ' + formatDateShort(win.next) + '</span>';
   } else {
     const st = ephemeris[key];
     if (!st) return;
@@ -3715,7 +3816,7 @@ function applyLayers() {
 }
 
 const projTmp = new THREE.Vector3();
-const labelOrder = ['sun','earth','moon','jupiter','saturn','mars','venus','mercury','uranus','neptune','pluto','halley'];
+const labelOrder = ['sun','earth','moon','jupiter','saturn','mars','venus','mercury','uranus','neptune','pluto'].concat(COMET_KEYS);
 function updateLabelVisibility() {
   const L = state.layers;
   if (!moonObj) return;

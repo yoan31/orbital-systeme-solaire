@@ -2,7 +2,8 @@
 
 Simulation 3D interactive du système solaire dans une seule page HTML, sans build ni backend.
 Positions héliocentriques recalculées depuis le Jour Julian à chaque image ; textures réelles des
-planètes, météo terrestre et activité solaire en direct.
+planètes, météo terrestre et activité solaire en direct. Cinq comètes célèbres sont simulées sur
+leurs éléments osculateurs JPL (Halley, Encke, 67P, Swift-Tuttle, Hale-Bopp).
 
 **Démo en ligne :** https://yoan31.github.io/orbital-systeme-solaire/
 

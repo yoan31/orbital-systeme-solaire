@@ -36,7 +36,7 @@ except ImportError:  # pragma: no cover
 UA = ("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/122 Safari/537.36")
 BASE = "https://www.solarsystemscope.com/textures/download/"
-OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "textures")
+OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "public", "textures")
 
 # (nom final, [URL candidates], taille minimale en octets, largeur 4K ?)
 FILES = [

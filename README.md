@@ -10,30 +10,46 @@ leurs éléments osculateurs JPL (Halley, Encke, 67P, Swift-Tuttle, Hale-Bopp).
 ## Lancer en local
 
 ```bash
-python3 -m http.server 8000
-# http://localhost:8000
+npm install
+npm run dev
+# http://localhost:5173/orbital-systeme-solaire/
 ```
 
-`file://` ne fonctionne pas : les navigateurs bloquent le chargement des textures locales.
+Build de production :
+
+```bash
+npm run build
+npm run preview
+```
 
 ## Contenu
 
 | Fichier | Rôle |
 |---|---|
-| `index.html` | Application complète (HTML + CSS + JS, three.js 0.160 via CDN) |
-| `textures/` | Textures planétaires 2K–4K |
+| `src/` | Application Vite + React 19 + TypeScript + React Three Fiber |
+| `src/astro/` | Éphémérides pures (Standish JPL, Meeus ch. 47, IAU 2015) |
+| `src/scene/` | Corps célestes, ceintures, ciel, grilles |
+| `src/render/` | Boucle, caméra, étiquettes, post-traitement |
+| `src/shaders/` | GLSL portés du moteur d'origine (profondeur logarithmique incluse) |
+| `public/textures/` | Textures planétaires 2K–4K |
 | `download_textures.py` | Script de récupération / régénération des textures |
 | `CREDITS.txt` | Licences et sources détaillées |
 
+## Stack
+
+React 19, React Three Fiber 9, three.js 0.187, postprocessing (god rays, depth of field compatible
+profondeur logarithmique, bloom, SMAA, vignette, ACES), zustand, Vite 8, TypeScript strict.
+
 ## Déploiement
 
-Site statique : GitHub Pages sert directement la racine du dépôt (`index.html`).
-Aucune compilation, aucun secret, aucune variable d'environnement.
+GitHub Actions construit le site et le publie sur GitHub Pages :
+`.github/workflows/deploy.yml` (push sur `main` ou déclenchement manuel). Le `base` de Vite vaut
+`/orbital-systeme-solaire/`, les assets sont servis sous ce préfixe.
 
 ## Sources et licences
 
 - Textures : [Solar System Scope](https://www.solarsystemscope.com/textures/) — CC BY 4.0
-- Moteur : [three.js](https://github.com/mrdoob/three.js) r160 — MIT
+- Moteur : [three.js](https://github.com/mrdoob/three.js) r187 — MIT
 - Météo : [Open-Meteo](https://open-meteo.com/)
 - Imagerie Terre : [NASA GIBS](https://gibs.earthdata.nasa.gov/)
 - Activité solaire : [NOAA SWPC](https://www.swpc.noaa.gov/), [SDO/NASA](https://sdo.gsfc.nasa.gov/)
